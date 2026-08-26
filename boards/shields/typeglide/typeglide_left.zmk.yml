@@ -1,0 +1,10 @@
+file_format: "1"
+id: typeglide_left
+name: TypeGlide Left
+type: shield
+url: https://github.com/josod/zmk-typeglide
+requires:
+  - pro_micro
+siblings:
+  - typeglide_left
+  - typeglide_right

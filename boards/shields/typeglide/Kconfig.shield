@@ -1,0 +1,5 @@
+config SHIELD_TYPEGLIDE_LEFT
+    def_bool $(shields_list_contains,typeglide_left)
+
+config SHIELD_TYPEGLIDE_RIGHT
+    def_bool $(shields_list_contains,typeglide_right)

@@ -1,0 +1,28 @@
+#include "typeglide.dtsi"
+#include <dt-bindings/gpio/gpio.h>
+
+// Left half
+// col 0 = ring (outermost), col 1 = middle, col 2 = index (innermost)
+// row 3 col 0 = pinky, row 3 col 2 = thumb, row 3 col 1 = spare (no key)
+// TODO: adjust pin numbers to match your PCB routing
+
+/ {
+    kscan0: kscan {
+        compatible = "zmk,kscan-gpio-matrix";
+        wakeup-source;
+        diode-direction = "col2row";
+
+        row-gpios
+            = <&pro_micro 4 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  // row 0 (top)
+            , <&pro_micro 5 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  // row 1
+            , <&pro_micro 6 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  // row 2
+            , <&pro_micro 7 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  // row 3 (pinky + thumb)
+            ;
+
+        col-gpios
+            = <&pro_micro 8  GPIO_ACTIVE_HIGH>  // col 0 — ring
+            , <&pro_micro 9  GPIO_ACTIVE_HIGH>  // col 1 — middle
+            , <&pro_micro 10 GPIO_ACTIVE_HIGH>  // col 2 — index
+            ;
+    };
+};
