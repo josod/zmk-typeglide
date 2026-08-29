@@ -28,7 +28,7 @@ cd /workspaces/zmk/app
 
 build_left() {
     echo ">>> Building left half..."
-    west build $PRISTINE -d build/left -b $BOARD -- \
+    west build $PRISTINE -d build/left -b $BOARD -S zmk-usb-logging  -- \
         -DSHIELD=typeglide_left \
         -DZMK_EXTRA_MODULES="$EXTRA_MODULES" \
         -DZMK_CONFIG="$CONFIG"
@@ -37,7 +37,7 @@ build_left() {
 
 build_right() {
     echo ">>> Building right half..."
-    west build $PRISTINE -d build/right -b $BOARD -- \
+    west build $PRISTINE -d build/right -b $BOARD -S zmk-usb-logging  -- \
         -DSHIELD=typeglide_right \
         -DZMK_EXTRA_MODULES="$EXTRA_MODULES" \
         -DZMK_CONFIG="$CONFIG"

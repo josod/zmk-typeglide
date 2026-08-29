@@ -7,6 +7,11 @@
 // row 3 col 0 = thumb, row 3 col 2 = pinky, row 3 col 1 = spare (no key)
 // TODO: adjust pin numbers to match your PCB routing
 
+&default_transform {
+    col-offset = <3>;
+};
+
+
 / {
     kscan0: kscan {
         compatible = "zmk,kscan-gpio-matrix";
