@@ -13,7 +13,7 @@ SIDE=${1:-both}
 CLEAN=${2:-}
 
 BOARD="nice_nano//zmk"
-EXTRA_MODULES="/workspaces/zmk-modules/zmk-typeglide"
+EXTRA_MODULES="/workspaces/zmk-modules/zmk-typeglide;/workspaces/zmk-modules/zmk-pmw3610-driver;/workspaces/zmk-modules/zmk-input-processor-rotate-plane"
 CONFIG="/workspaces/zmk-config/config"
 PRISTINE=""
 

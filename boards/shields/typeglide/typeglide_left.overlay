@@ -1,5 +1,6 @@
 #include "typeglide.dtsi"
 #include <dt-bindings/gpio/gpio.h>
+#include <input/processors/rotate_plane.dtsi>
 
 // Left half
 // col 0 = ring (outermost), col 1 = middle, col 2 = index (innermost)
@@ -24,5 +25,24 @@
             , <&pro_micro 9  (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  // col 1 — middle
             , <&pro_micro 10 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  // col 2 — index
             ;
+    };
+};
+
+
+&zip_rotate_pointer {
+    angle = <270>;
+};
+
+&m_split_listener {
+    status = "okay";
+    input-processors = <&zip_rotate_pointer>;
+    //input-processors = <&pointer_accel>;
+
+};
+
+/ {
+    rotated_pointer_plane {
+        compatible = "zmk,input-listener";
+        device = <&zip_rotate_pointer>;
     };
 };

@@ -30,3 +30,25 @@
         >;
     };
 };
+
+/ {
+    split_inputs {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        m_split_input: m_split_input@0 {
+            compatible = "zmk,input-split";
+            reg = <0>;
+        };
+    };
+
+
+
+    m_split_listener: m_split_listener {
+        compatible = "zmk,input-listener";
+        status = "disabled";
+        device = <&m_split_input>;
+     //   input-processors = <&zip_rotate_pointer>;
+
+    };
+};

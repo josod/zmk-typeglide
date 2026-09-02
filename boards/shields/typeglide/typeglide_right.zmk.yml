@@ -4,7 +4,11 @@ name: TypeGlide Right
 type: shield
 url: https://github.com/josod/zmk-typeglide
 requires:
-  - pro_micro
+    - pro_micro
+features:
+    - keys
+    - pointer
+    - studio
 siblings:
-  - typeglide_left
-  - typeglide_right
+    - typeglide_left
+    - typeglide_right
