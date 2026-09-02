@@ -30,7 +30,7 @@
 
 
 &zip_rotate_pointer {
-    angle = <270>;
+    angle = <180>;
 };
 
 &m_split_listener {
