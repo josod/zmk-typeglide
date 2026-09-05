@@ -1,6 +1,8 @@
 #include "typeglide.dtsi"
 #include <dt-bindings/gpio/gpio.h>
 #include <input/processors/rotate_plane.dtsi>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
 
 // Left half
 // col 0 = ring (outermost), col 1 = middle, col 2 = index (innermost)
@@ -37,12 +39,64 @@
     status = "okay";
     input-processors = <&zip_rotate_pointer>;
     //input-processors = <&pointer_accel>;
+};
 
+&adc {
+	status = "okay";
 };
 
 / {
     rotated_pointer_plane {
         compatible = "zmk,input-listener";
         device = <&zip_rotate_pointer>;
+    };
+
+
+
+    anin0: analog_input_0 {
+		compatible = "zmk,analog-input";
+		sampling-hz = <100>;
+		x-ch {
+			io-channels = <&adc 5>; // <--- see ain-map.png for nRF52840
+			mv-mid = <1610>;
+			mv-min-max = <1500>;
+			mv-deadzone = <20>;
+	//		scale-multiplier = <1>;
+		//	scale-divisor = <70>;
+		//	invert;
+			evt-type = <INPUT_EV_REL>;
+			input-code = <INPUT_REL_X>;
+		};
+		y-ch {
+			io-channels = <&adc 7>; // <--- see ain-map.png for nRF52840
+			mv-mid = <1610>;
+			mv-min-max = <1500>;
+			mv-deadzone = <20>;
+		//	scale-multiplier = <3>;
+	//		scale-divisor = <4>;
+		//	invert;
+			evt-type = <INPUT_EV_REL>;
+			input-code = <INPUT_REL_Y>;
+
+			/* enable report mdoe for gamepad axix or knob */
+			/* to only call input_report on quantquantized value is updated */
+			/* NOTE: mouse input does NOT need this */
+
+			// report-on-change-only;
+
+
+		};
+	};
+};
+/ {
+    joystick_4way: joystick_4way {
+        compatible = "typeglide,joystick-4way";
+        threshold = <5>;
+    };
+
+    joystick_listener: joystick_listener {
+        compatible = "zmk,input-listener";
+        device = <&anin0>;
+        input-processors = <&joystick_4way>;
     };
 };

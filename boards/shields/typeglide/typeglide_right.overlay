@@ -1,5 +1,7 @@
 #include "typeglide.dtsi"
 #include <dt-bindings/gpio/gpio.h>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
 
 // Right half — mirrored physically but same GPIO structure
 // col 0 = index (innermost), col 1 = middle, col 2 = ring (outermost)
@@ -62,14 +64,14 @@
     pinctrl-0 = <&spi0_default>;
     pinctrl-1 = <&spi0_sleep>;
     pinctrl-names = "default", "sleep";
-    cs-gpios = <&pro_micro 20 GPIO_ACTIVE_LOW>;
+    cs-gpios = <&pro_micro 0 GPIO_ACTIVE_LOW>;
 
     pmw3610: pmw3610@0 {
         status = "okay";
         compatible = "pixart,pmw3610-alt";
         reg = <0>;
         spi-max-frequency = <2000000>;
-        irq-gpios = <&pro_micro 21 (GPIO_ACTIVE_LOW  | GPIO_PULL_UP)>;
+        irq-gpios = <&pro_micro 1 (GPIO_ACTIVE_LOW  | GPIO_PULL_UP)>;
         cpi = <800>;
         evt-type = <INPUT_EV_REL>;
         x-input-code = <INPUT_REL_X>;
@@ -84,3 +86,46 @@
 &m_split_input {
     device = <&pmw3610>;
 };
+
+&adc {
+    status = "okay";
+};
+
+/ {
+
+
+    anin0: analog_input_0 {
+		compatible = "zmk,analog-input";
+		sampling-hz = <100>;
+		x-ch {
+			io-channels = <&adc 5>; // <--- see ain-map.png for nRF52840
+			mv-mid = <1610>;
+			mv-min-max = <1500>;
+			mv-deadzone = <20>;
+	//		scale-multiplier = <1>;
+		//	scale-divisor = <70>;
+		//	invert;
+			evt-type = <INPUT_EV_REL>;
+			input-code = <INPUT_REL_X>;
+		};
+		y-ch {
+			io-channels = <&adc 7>; // <--- see ain-map.png for nRF52840
+			mv-mid = <1610>;
+			mv-min-max = <1500>;
+			mv-deadzone = <20>;
+		//	scale-multiplier = <3>;
+	//		scale-divisor = <4>;
+		//	invert;
+			evt-type = <INPUT_EV_REL>;
+			input-code = <INPUT_REL_Y>;
+
+			/* enable report mdoe for gamepad axix or knob */
+			/* to only call input_report on quantquantized value is updated */
+			/* NOTE: mouse input does NOT need this */
+
+			// report-on-change-only;
+
+
+		};
+	  };
+	};

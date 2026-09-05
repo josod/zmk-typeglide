@@ -1,4 +1,5 @@
 #include <dt-bindings/zmk/matrix_transform.h>
+#include <zephyr/dt-bindings/adc/adc.h>
 
 / {
     chosen {
@@ -29,6 +30,8 @@
             RC(3,0) RC(3,2)           RC(3,3) RC(3,5)
         >;
     };
+
+
 };
 
 / {
