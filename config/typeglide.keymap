@@ -13,7 +13,7 @@
             &kp RIGHT
         >;
 
-        threshold = <5>;
+        threshold = <10>;
     };
 
     keymap {

@@ -1,80 +1,127 @@
+
 #include "typeglide.dtsi"
+#include "joystick.dtsi"
+
 #include <dt-bindings/gpio/gpio.h>
 #include <input/processors/rotate_plane.dtsi>
-#include <zephyr/dt-bindings/input/input-event-codes.h>
 
 
-// Left half
-// col 0 = ring (outermost), col 1 = middle, col 2 = index (innermost)
-// row 3 col 0 = pinky, row 3 col 2 = thumb, row 3 col 1 = spare (no key)
-// TODO: adjust pin numbers to match your PCB routing
+/*
+ * Left half
+ *
+ * col 0 = ring (outermost)
+ * col 1 = middle
+ * col 2 = index (innermost)
+ *
+ * row 3 col 0 = pinky
+ * row 3 col 2 = thumb
+ * row 3 col 1 = spare
+ */
 
-/ {
+ / {
     kscan0: kscan {
         compatible = "zmk,kscan-gpio-matrix";
         wakeup-source;
         diode-direction = "row2col";
 
         row-gpios
-            = <&pro_micro 4 GPIO_ACTIVE_HIGH>  // row 0 (top)
-            , <&pro_micro 5 GPIO_ACTIVE_HIGH>  // row 1
-            , <&pro_micro 6 GPIO_ACTIVE_HIGH>  // row 2
-            , <&pro_micro 7 GPIO_ACTIVE_HIGH>  // row 3 (pinky + thumb)
+            = <&pro_micro 4 GPIO_ACTIVE_HIGH>
+            , <&pro_micro 5 GPIO_ACTIVE_HIGH>
+            , <&pro_micro 6 GPIO_ACTIVE_HIGH>
+            , <&pro_micro 7 GPIO_ACTIVE_HIGH>
             ;
 
         col-gpios
-            = <&pro_micro 8  (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  // col 0 — ring
-            , <&pro_micro 9  (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  // col 1 — middle
-            , <&pro_micro 10 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  // col 2 — index
+            = <&pro_micro 8  (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&pro_micro 9  (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&pro_micro 10 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
             ;
     };
 };
 
+
+/*
+ * Rotate the pointing device for the left half.
+ */
 
 &zip_rotate_pointer {
     angle = <180>;
 };
 
+
+/*
+ * Split pointing input.
+ *
+ * This is the PMW3610 coming from the right half.
+ */
+
 &m_split_listener {
     status = "okay";
     input-processors = <&zip_rotate_pointer>;
-    //input-processors = <&pointer_accel>;
 };
 
-&adc {
-	status = "okay";
-};
 
-/ {
-   /*
-    rotated_pointer_plane {
+/*
+ * Local joystick.
+ *
+ * The left half is central, so its joystick is processed locally.
+ *
+ * &joystick is ONE analog input device containing:
+ *
+ *     INPUT_ABS_X
+ *     INPUT_ABS_Y
+ *
+ * The Typeglide processor keeps the X/Y state and converts it
+ * into one of:
+ *
+ *     RIGHT
+ *     LEFT
+ *     DOWN
+ *     UP
+ */
+
+ / {
+    joystick_listener {
         compatible = "zmk,input-listener";
-        device = <&zip_rotate_pointer>;
+        device = <&joystick>;
+        input-processors = <&joystick_4way>;
     };
-*/
-
-
-
 };
 
 
-/ {
-    analog_stick0: analog_stick0 {
-        compatible = "zmk,analog-stick";
+/*
+ * Right-half joystick split transport.
+ *
+ * The right peripheral sends the COMPLETE joystick device
+ * (both X and Y events) through one input-split device.
+ *
+ * reg 0 = PMW3610
+ * reg 1 = joystick
+ */
 
-        io-channels = <&adc 5>, <&adc 7>;
+ / {
 
-        x-min = <0>;
-        x-center = <2048>;
-        x-max = <4095>;
+    split_inputs {
+        #address-cells = <1>;
+        #size-cells = <0>;
 
-        y-min = <0>;
-        y-center = <2048>;
-        y-max = <4095>;
+        right_joystick_split: right_joystick_split@1 {
+            compatible = "zmk,input-split";
+            reg = <1>;
+        };
+    };
 
-        deadzone-percent = <5>;
+    /*
+     * Process the right joystick centrally.
+     *
+     * Both INPUT_ABS_X and INPUT_ABS_Y arrive through the same
+     * input device, allowing joystick_4way to maintain the
+     * correct X/Y state.
+     */
 
-        wait-period-idle = <100>;
-        wait-period-active = <1>;
+    right_joystick_listener {
+        compatible = "zmk,input-listener";
+        device = <&right_joystick_split>;
+        input-processors = <&joystick_4way>;
     };
 };

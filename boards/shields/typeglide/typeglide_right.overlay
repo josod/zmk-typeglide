@@ -1,7 +1,6 @@
 #include "typeglide.dtsi"
 #include <dt-bindings/gpio/gpio.h>
-#include <zephyr/dt-bindings/input/input-event-codes.h>
-
+#include "joystick.dtsi"
 
 // Right half — mirrored physically but same GPIO structure
 // col 0 = index (innermost), col 1 = middle, col 2 = ring (outermost)
@@ -87,45 +86,27 @@
     device = <&pmw3610>;
 };
 
-&adc {
-    status = "okay";
-};
+
 
 / {
 
 
-    anin0: analog_input_0 {
-		compatible = "zmk,analog-input";
-		sampling-hz = <100>;
-		x-ch {
-			io-channels = <&adc 5>; // <--- see ain-map.png for nRF52840
-			mv-mid = <1610>;
-			mv-min-max = <1500>;
-			mv-deadzone = <20>;
-	//		scale-multiplier = <1>;
-		//	scale-divisor = <70>;
-		//	invert;
-			evt-type = <INPUT_EV_REL>;
-			input-code = <INPUT_REL_X>;
-		};
-		y-ch {
-			io-channels = <&adc 7>; // <--- see ain-map.png for nRF52840
-			mv-mid = <1610>;
-			mv-min-max = <1500>;
-			mv-deadzone = <20>;
-		//	scale-multiplier = <3>;
-	//		scale-divisor = <4>;
-		//	invert;
-			evt-type = <INPUT_EV_REL>;
-			input-code = <INPUT_REL_Y>;
+    /*
 
-			/* enable report mdoe for gamepad axix or knob */
-			/* to only call input_report on quantquantized value is updated */
-			/* NOTE: mouse input does NOT need this */
+    * Relay the complete joystick device (X + Y) to the
+     * central side as one input device.
+     *
+     * reg 0 is already used by the PMW3610.
+     */
 
-			// report-on-change-only;
+ split_inputs {
+        #address-cells = <1>;
+        #size-cells = <0>;
 
-
-		};
-	  };
-	};
+        right_joystick_split: right_joystick_split@1 {
+            compatible = "zmk,input-split";
+            reg = <1>;
+            device = <&joystick>;
+        };
+    };
+};

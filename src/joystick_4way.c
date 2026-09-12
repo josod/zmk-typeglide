@@ -1,6 +1,8 @@
 
 /*
- * Typeglide 4-way analog joystick input processor.
+ * Copyright (c) 2026 Typeglide
+ *
+ * SPDX-License-Identifier: MIT
  */
 
 #define DT_DRV_COMPAT typeglide_joystick_4way
@@ -12,95 +14,159 @@
 #include <zephyr/sys/util.h>
 
 #include <drivers/input_processor.h>
-#include <zmk/behavior.h>
+
 #include <zmk/keymap.h>
+#include <zmk/behavior.h>
 #include <zmk/virtual_key_position.h>
 
-#include <zephyr/dt-bindings/input/input-event-codes.h>
-#include <stdlib.h>
+LOG_MODULE_REGISTER(typeglide_joystick_4way, CONFIG_ZMK_LOG_LEVEL);
 
-LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
+enum joystick_direction {
+    JOY_NONE = 0,
+    JOY_RIGHT,
+    JOY_LEFT,
+    JOY_DOWN,
+    JOY_UP,
+};
 
 struct joystick_4way_config {
-    struct zmk_behavior_binding bindings[4];
     int32_t threshold;
-    uint8_t index;
+
+    size_t binding_count;
+    const struct zmk_behavior_binding *bindings;
 };
 
 struct joystick_4way_data {
     int32_t x;
     int32_t y;
-    int8_t direction;
+    bool have_x;
+    bool have_y;
+    enum joystick_direction direction;
 };
 
-
-/*
- * Direction values:
- */
-
-#define JOY_CEILING   0
-#define JOY_FLOOR     1
-#define JOY_FORWARD   2
-#define JOY_BACK      3
-#define JOY_CENTER   -1
-
-static int joystick_4way_get_direction(
+static enum joystick_direction joystick_get_direction(
     const struct joystick_4way_config *cfg,
-    struct joystick_4way_data *data) {
+    int32_t x,
+    int32_t y) {
 
-    int32_t x = data->x;
-    int32_t y = data->y;
+    const int32_t center_x = 59;
+    const int32_t center_y = 127;
 
-    LOG_DBG("4WAY: calculating direction");
-    LOG_DBG("4WAY: raw x=%d y=%d threshold=%d",
-            x, y, cfg->threshold);
+    int32_t dx = x - center_x;
+    int32_t dy = y - center_y;
 
-    /*
-     * Apply dead zone.
-     */
-    if (abs(x) < cfg->threshold) {
-        LOG_DBG("4WAY: X inside dead zone: %d -> 0", x);
-        x = 0;
+    int32_t abs_x = (dx < 0) ? -dx : dx;
+    int32_t abs_y = (dy < 0) ? -dy : dy;
+
+    LOG_DBG("4WAY: x=%d y=%d dx=%d dy=%d threshold=%d",
+            x, y, dx, dy, cfg->threshold);
+
+    if (abs_x < cfg->threshold && abs_y < cfg->threshold) {
+        return JOY_NONE;
     }
 
-    if (abs(y) < cfg->threshold) {
-        LOG_DBG("4WAY: Y inside dead zone: %d -> 0", y);
-        y = 0;
+    if (abs_x >= abs_y) {
+        return (dx >= 0) ? JOY_RIGHT : JOY_LEFT;
     }
 
-    LOG_DBG("4WAY: after dead zone x=%d y=%d", x, y);
+    return (dy >= 0) ? JOY_DOWN : JOY_UP;
+}
 
-    /*
-     * Joystick is centered.
-     */
-    if (x == 0 && y == 0) {
-        LOG_DBG("4WAY: CENTER");
-        return -1;
+static int joystick_invoke(
+    const struct device *dev,
+    const struct joystick_4way_config *cfg,
+    struct zmk_input_processor_state *state,
+    enum joystick_direction direction,
+    bool pressed) {
+
+    if (direction == JOY_NONE) {
+        return 0;
     }
 
     /*
-     * Use the dominant axis if the joystick is diagonal.
+     * bindings[] order:
+     *
+     * 0 = RIGHT
+     * 1 = LEFT
+     * 2 = DOWN
+     * 3 = UP
      */
-    if (abs(x) >= abs(y)) {
+    size_t index = direction - 1;
 
-        if (x < 0) {
-            LOG_DBG("4WAY: direction FORWARD");
-            return JOY_FORWARD;
-        } else {
-            LOG_DBG("4WAY: direction BACK");
-            return JOY_BACK;
+    if (index >= cfg->binding_count) {
+        LOG_ERR("Invalid joystick direction %d", direction);
+        return -EINVAL;
+    }
+
+    struct zmk_behavior_binding_event behavior_event = {
+        .position = ZMK_VIRTUAL_KEY_POSITION_BEHAVIOR_INPUT_PROCESSOR(
+            state->input_device_index,
+            0),
+        .timestamp = k_uptime_get(),
+#if IS_ENABLED(CONFIG_ZMK_SPLIT)
+        .source = ZMK_POSITION_STATE_CHANGE_SOURCE_LOCAL,
+#endif
+    };
+
+    LOG_DBG(
+        "4WAY: %s direction=%d position=%d",
+        pressed ? "PRESS" : "RELEASE",
+        direction,
+        behavior_event.position);
+
+    return zmk_behavior_invoke_binding(
+        &cfg->bindings[index],
+        behavior_event,
+        pressed);
+}
+
+static int joystick_4way_change_direction(
+    const struct device *dev,
+    const struct joystick_4way_config *cfg,
+    struct joystick_4way_data *data,
+    struct zmk_input_processor_state *state,
+    enum joystick_direction new_direction) {
+
+    if (new_direction == data->direction) {
+        return 0;
+    }
+
+    /*
+     * Release the previous direction first.
+     */
+    if (data->direction != JOY_NONE) {
+        int ret = joystick_invoke(
+            dev,
+            cfg,
+            state,
+            data->direction,
+            false);
+
+        if (ret < 0) {
+            return ret;
         }
+    }
 
-    } else {
+    data->direction = new_direction;
 
-        if (y > 0) {
-            LOG_DBG("4WAY: direction CEILING");
-            return JOY_CEILING;
-        } else {
-            LOG_DBG("4WAY: direction FLOOR");
-            return JOY_FLOOR;
+    /*
+     * Press the new direction.
+     */
+    if (new_direction != JOY_NONE) {
+        int ret = joystick_invoke(
+            dev,
+            cfg,
+            state,
+            new_direction,
+            true);
+
+        if (ret < 0) {
+            data->direction = JOY_NONE;
+            return ret;
         }
     }
+
+    return 0;
 }
 
 static int joystick_4way_handle_event(
@@ -113,227 +179,101 @@ static int joystick_4way_handle_event(
     const struct joystick_4way_config *cfg = dev->config;
     struct joystick_4way_data *data = dev->data;
 
-    LOG_DBG("4WAY: ----------------------------------------");
-    LOG_DBG("4WAY: EVENT received");
-    LOG_DBG("4WAY: type=%d code=%d value=%d",
-            event->type,
-            event->code,
-            event->value);
-
-    LOG_DBG("4WAY: previous state x=%d y=%d direction=%d",
-            data->x,
-            data->y,
-            data->direction);
-
-    LOG_DBG("4WAY: input_device_index=%d",
-            state->input_device_index);
+    ARG_UNUSED(param1);
+    ARG_UNUSED(param2);
 
     /*
-     * Only process relative events.
+     * We only consume X/Y absolute joystick events.
      */
-    if (event->type != INPUT_EV_REL) {
-        LOG_DBG("4WAY: ignoring event - not INPUT_EV_REL");
+    if (event->type != INPUT_EV_ABS) {
         return ZMK_INPUT_PROC_CONTINUE;
     }
 
-    /*
-     * X axis.
-     */
-    if (event->code == INPUT_REL_X) {
+    switch (event->code) {
+    case INPUT_ABS_X:
+        data->x = event->value;
+        data->have_x = true;
+        break;
 
-        LOG_DBG("4WAY: INPUT_REL_X received");
-        LOG_DBG("4WAY: X value=%d", event->value);
+    case INPUT_ABS_Y:
+        data->y = event->value;
+        data->have_y = true;
+        break;
 
-        if (abs(event->value) < cfg->threshold) {
-            data->x = 0;
-            LOG_DBG("4WAY: X inside dead zone -> 0");
-        } else {
-            data->x = event->value;
-        }
-
-    /*
-     * Y axis.
-     */
-    } else if (event->code == INPUT_REL_Y) {
-
-        LOG_DBG("4WAY: INPUT_REL_Y received");
-        LOG_DBG("4WAY: Y value=%d", event->value);
-
-        if (abs(event->value) < cfg->threshold) {
-            data->y = 0;
-            LOG_DBG("4WAY: Y inside dead zone -> 0");
-        } else {
-            data->y = event->value;
-        }
-
-    /*
-     * Something else.
-     */
-    } else {
-
-        LOG_DBG("4WAY: ignoring unknown REL code=%d",
-                event->code);
-
+    default:
         return ZMK_INPUT_PROC_CONTINUE;
     }
 
-    LOG_DBG("4WAY: stored x=%d y=%d",
-            data->x,
-            data->y);
-
-    /*
-     * Determine new joystick direction.
-     */
-    int8_t new_direction =
-        joystick_4way_get_direction(cfg, data);
-
-    LOG_DBG("4WAY: old direction=%d new direction=%d",
-            data->direction,
-            new_direction);
-
-    /*
-     * Nothing changed.
-     */
-    if (new_direction == data->direction) {
-
-        LOG_DBG("4WAY: direction unchanged");
-        LOG_DBG("4WAY: stopping event");
-
+    if (!data->have_x || !data->have_y) {
         return ZMK_INPUT_PROC_STOP;
     }
 
-    /*
-     * Create the ZMK behavior event.
-     */
-    struct zmk_behavior_binding_event behavior_event = {
-        .position =
-            ZMK_VIRTUAL_KEY_POSITION_BEHAVIOR_INPUT_PROCESSOR(
-                state->input_device_index,
-                cfg->index),
+    enum joystick_direction direction =
+        joystick_get_direction(cfg, data->x, data->y);
 
-        .timestamp = k_uptime_get(),
+    LOG_DBG(
+        "4WAY: x=%d y=%d -> direction=%d",
+        data->x,
+        data->y,
+        direction);
 
-#if IS_ENABLED(CONFIG_ZMK_SPLIT)
-        .source = ZMK_POSITION_STATE_CHANGE_SOURCE_LOCAL,
-#endif
-    };
+    int ret = joystick_4way_change_direction(
+        dev,
+        cfg,
+        data,
+        state,
+        direction);
 
-    LOG_DBG("4WAY: behavior event created");
-    LOG_DBG("4WAY: processor index=%d", cfg->index);
-    LOG_DBG("4WAY: position=%d", behavior_event.position);
-    LOG_DBG("4WAY: timestamp=%lld",
-            (long long)behavior_event.timestamp);
-
-    /*
-     * Release previous direction.
-     */
-    if (data->direction != JOY_CENTER) {
-
-        LOG_INF("4WAY: RELEASE direction=%d",
-                data->direction);
-
-        LOG_DBG("4WAY: invoking binding[%d] RELEASE",
-                data->direction);
-
-        int ret = zmk_behavior_invoke_binding(
-            &cfg->bindings[data->direction],
-            behavior_event,
-            false);
-
-        LOG_DBG("4WAY: release result=%d", ret);
+    if (ret < 0) {
+        LOG_ERR("Failed to change joystick direction: %d", ret);
+        return ret;
     }
 
     /*
-     * Press new direction.
+     * We consumed this ABS event.
      */
-    if (new_direction != JOY_CENTER) {
-
-        LOG_INF("4WAY: PRESS direction=%d",
-                new_direction);
-
-        LOG_DBG("4WAY: invoking binding[%d] PRESS",
-                new_direction);
-
-        int ret = zmk_behavior_invoke_binding(
-            &cfg->bindings[new_direction],
-            behavior_event,
-            true);
-
-        LOG_DBG("4WAY: press result=%d", ret);
-    } else {
-
-        LOG_DBG("4WAY: new direction is CENTER/NONE");
-    }
-
-    /*
-     * Save new state.
-     */
-    data->direction = new_direction;
-
-    LOG_DBG("4WAY: new state x=%d y=%d direction=%d",
-            data->x,
-            data->y,
-            data->direction);
-
-    LOG_DBG("4WAY: event processing complete");
-    LOG_DBG("4WAY: ----------------------------------------");
-
     return ZMK_INPUT_PROC_STOP;
 }
 
-static struct zmk_input_processor_driver_api joystick_4way_driver_api = {
+static const struct zmk_input_processor_driver_api joystick_4way_api = {
     .handle_event = joystick_4way_handle_event,
 };
 
-
 static int joystick_4way_init(const struct device *dev) {
-
     struct joystick_4way_data *data = dev->data;
-    const struct joystick_4way_config *cfg = dev->config;
 
     data->x = 0;
     data->y = 0;
-    data->direction = JOY_CENTER;
-
-    LOG_INF("4WAY: ========================================");
-    LOG_INF("4WAY: Typeglide joystick 4-way processor");
-    LOG_INF("4WAY: INITIALIZING");
-    LOG_INF("4WAY: device=%p", dev);
-    LOG_INF("4WAY: index=%d", cfg->index);
-    LOG_INF("4WAY: threshold=%d", cfg->threshold);
-
-    LOG_INF("4WAY: binding[%d] = CEILING", JOY_CEILING);
-    LOG_INF("4WAY: binding[%d] = FLOOR", JOY_FLOOR);
-    LOG_INF("4WAY: binding[%d] = FORWARD", JOY_FORWARD);
-    LOG_INF("4WAY: binding[%d] = BACK", JOY_BACK);
-
-    LOG_INF("4WAY: initial x=%d", data->x);
-    LOG_INF("4WAY: initial y=%d", data->y);
-    LOG_INF("4WAY: initial direction=%d", data->direction);
-
-    LOG_INF("4WAY: INITIALIZATION COMPLETE");
-    LOG_INF("4WAY: ========================================");
+    data->have_x = false;
+    data->have_y = false;
+    data->direction = JOY_NONE;
 
     return 0;
 }
 
-
-#define JOYSTICK_4WAY_INST(n)                                                   \
-    static const struct joystick_4way_config config_##n = {                    \
-        .bindings = {                                                          \
-            LISTIFY(DT_INST_PROP_LEN(n, bindings),                             \
-                    ZMK_KEYMAP_EXTRACT_BINDING, (,),                          \
-                    DT_DRV_INST(n))                                            \
-        },                                                                      \
-        .threshold = DT_INST_PROP(n, threshold),                              \
-        .index = n,                                                            \
-    };                                                                          \
-    static struct joystick_4way_data data_##n;                                 \
-    DEVICE_DT_INST_DEFINE(                                                     \
-        n, joystick_4way_init, NULL,                                             \
-        &data_##n, &config_##n,                                                  \
-        POST_KERNEL, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT,                       \
-        &joystick_4way_driver_api);
-
+#define JOYSTICK_4WAY_INST(n)                                                \
+    static const struct zmk_behavior_binding                          \
+        joystick_4way_bindings_##n[] = {                                      \
+            LISTIFY(DT_INST_PROP_LEN(n, bindings),                           \
+                    ZMK_KEYMAP_EXTRACT_BINDING, (, ), DT_DRV_INST(n))};      \
+                                                                              \
+    static const struct joystick_4way_config                              \
+        joystick_4way_config_##n = {                                          \
+            .threshold = DT_INST_PROP(n, threshold),                         \
+            .binding_count = ARRAY_SIZE(joystick_4way_bindings_##n),         \
+            .bindings = joystick_4way_bindings_##n,                          \
+        };                                                                    \
+                                                                              \
+    static struct joystick_4way_data joystick_4way_data_##n;                  \
+                                                                              \
+    DEVICE_DT_INST_DEFINE(                                                    \
+        n,                                                                    \
+        joystick_4way_init,                                                   \
+        NULL,                                                                 \
+        &joystick_4way_data_##n,                                              \
+        &joystick_4way_config_##n,                                             \
+        POST_KERNEL,                                                          \
+        CONFIG_KERNEL_INIT_PRIORITY_DEFAULT,                                 \
+        &joystick_4way_api);
 
 DT_INST_FOREACH_STATUS_OKAY(JOYSTICK_4WAY_INST)

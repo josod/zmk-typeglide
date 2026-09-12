@@ -13,9 +13,10 @@ SIDE=${1:-both}
 CLEAN=${2:-}
 
 BOARD="nice_nano//zmk"
-EXTRA_MODULES="/workspaces/zmk-modules/zmk-typeglide;/workspaces/zmk-modules/zmk-driver-analog-stick;/workspaces/zmk-modules/zmk-pmw3610-driver;/workspaces/zmk-modules/zmk-input-processor-rotate-plane;/workspaces/zmk-modules/zmk-analog-input-driver"
-CONFIG="/workspaces/zmk-config/config"
+EXTRA_MODULES="/workspaces/zmk-modules/zmk-typeglide;/workspaces/zmk-modules/zmk-pmw3610-driver;/workspaces/zmk-modules/zmk-input-processor-rotate-plane"
 PRISTINE=""
+CONFIG="/workspaces/zmk-config/config"
+
 
 # Suppress git safe directory warning
 git config --global --add safe.directory /workspaces/zmk 2>/dev/null || true
