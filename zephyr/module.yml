@@ -1,4 +1,6 @@
 build:
-    cmake-ext: true
-    settings:
-        board_root: .
+  cmake: .
+  kconfig: Kconfig
+  settings:
+    board_root: .
+    dts_root: .
