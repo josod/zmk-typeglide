@@ -31,3 +31,7 @@ properties:
     required: true
     description: >
       Four ZMK behavior bindings in RIGHT, LEFT, DOWN, UP order.
+
+  layer-count:
+    type: int
+    required: true

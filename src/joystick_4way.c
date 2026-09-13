@@ -39,7 +39,7 @@ int32_t threshold;
 int32_t rotation_deg;
 int32_t hysteresis_deg;
 
-
+uint8_t layer_count;
 size_t binding_count;
 const struct zmk_behavior_binding *bindings;
 
@@ -47,17 +47,19 @@ const struct zmk_behavior_binding *bindings;
 };
 
 struct joystick_4way_data {
-int32_t x;
-int32_t y;
+    int32_t x;
+    int32_t y;
 
-bool have_x;
-bool have_y;
+    bool have_x;
+    bool have_y;
 
-bool x_updated;
-bool y_updated;
+    bool x_updated;
+    bool y_updated;
 
-enum joystick_direction direction;
+    enum joystick_direction direction;
 
+    int active_binding_index;
+    zmk_keymap_layer_index_t active_layer;
 };
 
 /*
@@ -390,66 +392,130 @@ return direction;
 /* ------------------------------------------------------------------------- */
 
 static int joystick_invoke(
-const struct device *dev,
-const struct joystick_4way_config *cfg,
-struct zmk_input_processor_state *state,
-enum joystick_direction direction,
-bool pressed) {
+    const struct device *dev,
+    const struct joystick_4way_config *cfg,
+    struct joystick_4way_data *data,
+    struct zmk_input_processor_state *state,
+    enum joystick_direction direction,
+    bool pressed) {
+
+    ARG_UNUSED(dev);
+
+    if (direction == JOY_NONE) {
+        return 0;
+    }
+
+    /*
+     * Four bindings per layer:
+     *
+     *   UP
+     *   DOWN
+     *   FORWARD
+     *   BACKWARD
+     */
+    const size_t directions_per_layer = 4;
+
+    size_t binding_index;
+
+    if (pressed) {
+        /*
+         * Select the binding from the currently active layer.
+         */
+        zmk_keymap_layer_index_t layer =
+            zmk_keymap_highest_layer_active();
 
 
-ARG_UNUSED(dev);
+        /*
+         * If the active ZMK layer has no joystick mapping,
+         * fall back to layer 0 for now.
+         */
+        if (layer >= cfg->layer_count) {
+            LOG_DBG(
+                "4WAY: layer %d has no joystick mapping, using layer 0",
+                layer);
 
-if (direction == JOY_NONE) {
-    return 0;
-}
+            layer = 0;
+        }
 
-/*
- * Physical joystick virtual positions:
- *
- *   0 = UP
- *   1 = DOWN
- *   2 = FORWARD
- *   3 = BACKWARD
- */
-size_t index = direction - 1;
+        binding_index =
+            ((size_t)layer * directions_per_layer) +
+            (direction - 1);
 
-if (index >= cfg->binding_count) {
-    LOG_ERR(
-        "Invalid joystick direction %d",
-        direction);
+        if (binding_index >= cfg->binding_count) {
+            LOG_ERR(
+                "No joystick binding: layer=%d direction=%d index=%d",
+                layer,
+                direction,
+                binding_index);
 
-    return -EINVAL;
-}
+            return -EINVAL;
+        }
 
-int virtual_position = direction - 1;
+        /*
+         * Remember exactly what we pressed.
+         *
+         * This is important if the layer changes while
+         * the joystick is still held.
+         */
+        data->active_binding_index = binding_index;
+        data->active_layer = layer;
 
-struct zmk_behavior_binding_event behavior_event = {
-    .position =
-        ZMK_VIRTUAL_KEY_POSITION_BEHAVIOR_INPUT_PROCESSOR(
-            state->input_device_index,
-            virtual_position),
+    } else {
 
-    .timestamp = k_uptime_get(),
+        /*
+         * Release the exact binding that was pressed.
+         * Do NOT look at the current layer here.
+         */
+        if (data->active_binding_index < 0 ||
+            data->active_binding_index >= cfg->binding_count) {
 
+            LOG_ERR(
+                "No active joystick binding to release");
+
+            return -EINVAL;
+        }
+
+        binding_index = data->active_binding_index;
+    }
+
+    const struct zmk_behavior_binding *binding =
+        &cfg->bindings[binding_index];
+
+    struct zmk_behavior_binding_event behavior_event = {
+        .position =
+            ZMK_VIRTUAL_KEY_POSITION_BEHAVIOR_INPUT_PROCESSOR(
+                state->input_device_index,
+                direction - 1),
+        .layer = zmk_keymap_layer_index_to_id(data->active_layer),
+        .timestamp = k_uptime_get(),
 
 #if IS_ENABLED(CONFIG_ZMK_SPLIT)
-.source = ZMK_POSITION_STATE_CHANGE_SOURCE_LOCAL,
+        .source = ZMK_POSITION_STATE_CHANGE_SOURCE_LOCAL,
 #endif
-};
+    };
 
+    LOG_DBG(
+        "4WAY: %s direction=%d binding=%d layer=%d",
+        pressed ? "PRESS" : "RELEASE",
+        direction,
+        binding_index,
+        pressed ? zmk_keymap_highest_layer_active()
+                : data->active_layer);
 
-LOG_DBG(
-    "4WAY: %s direction=%d position=%d",
-    pressed ? "PRESS" : "RELEASE",
-    direction,
-    behavior_event.position);
+    int ret =
+        zmk_behavior_invoke_binding(
+            binding,
+            behavior_event,
+            pressed);
 
-return zmk_behavior_invoke_binding(
-    &cfg->bindings[index],
-    behavior_event,
-    pressed);
+    if (!pressed) {
+        /*
+         * The direction is no longer held.
+         */
+        data->active_binding_index = -1;
+    }
 
-
+    return ret;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -473,6 +539,7 @@ if (data->direction != JOY_NONE) {
     int ret = joystick_invoke(
         dev,
         cfg,
+        data,
         state,
         data->direction,
         false);
@@ -489,6 +556,7 @@ if (new_direction != JOY_NONE) {
     int ret = joystick_invoke(
         dev,
         cfg,
+        data,
         state,
         new_direction,
         true);
@@ -633,6 +701,8 @@ data->have_y = false;
 data->x_updated = false;
 data->y_updated = false;
 data->direction = JOY_NONE;
+data->active_binding_index = -1;
+data->active_layer = 0;
 
 const struct joystick_4way_config *cfg =
     dev->config;
@@ -683,6 +753,7 @@ LOG_INF(
             .threshold = DT_INST_PROP(n, threshold),                      \
             .rotation_deg = DT_INST_PROP(n, rotation_deg),                \
             .hysteresis_deg = DT_INST_PROP(n, hysteresis_deg),            \
+            .layer_count = DT_INST_PROP(n, layer_count),              \
             .binding_count =                                               \
                 ARRAY_SIZE(joystick_4way_bindings_##n),                   \
             .bindings = joystick_4way_bindings_##n,                       \

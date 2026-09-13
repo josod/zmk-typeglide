@@ -2,45 +2,26 @@
 #include <dt-bindings/zmk/keys.h>
 
 / {
-    joystick_4way: joystick_4way {
-    compatible = "typeglide,joystick-4way";
 
-    #input-processor-cells = <0>;
-
-    threshold = <10>;
-
-    /*
-     * Global mechanical rotation correction.
-     *
-     * Start at 0.
-     * Positive/negative values can be tested later.
-     */
-    rotation-deg = <0>;
-
-    /*
-     * Prevent rapid switching when moving near
-     * a 45-degree sector boundary.
-     */
-    hysteresis-deg = <10>;
-
-    /*
-     * RIGHT, LEFT, DOWN, UP
-     */
-    bindings = <&kp RIGHT>,
-               <&kp LEFT>,
-               <&kp DOWN>,
-               <&kp UP>;
-};
 
     keymap {
         compatible = "zmk,keymap";
 
         default_layer {
             bindings = <
-                &kp A  &kp B  &kp C      &kp D  &kp E  &kp F
+                &mo 1  &kp B  &kp C      &kp D  &kp E  &kp F
                 &kp G  &kp H  &kp I      &kp J  &kp K  &kp L
                 &kp M  &kp N  &kp O      &kp P  &kp Q  &kp R
                 &kp S  &kp T             &kp U  &kp V
+            >;
+        };
+
+        layer_1 {
+            bindings = <
+                &kp N1  &kp N2  &kp N3      &kp N4  &kp N5  &kp N6
+                &kp N7  &kp N8  &kp N9      &kp N0  &kp Q   &kp W
+                &kp E   &kp R   &kp T       &kp Y   &kp U   &kp I
+                &kp O   &kp P
             >;
         };
     };

@@ -10,8 +10,8 @@
  *
  * RKJX21224001
  *
- * X = AIN0
- * Y = AIN5
+ * X = AIN5
+ * Y = AIN7
  *
  * ADC center measured at approximately 1866 raw counts.
  * Joystick swing is approximately +/-1707 counts.
@@ -105,13 +105,21 @@
          */
         threshold = <20>;
 
-        /*
-         * Order:
-         * RIGHT, LEFT, DOWN, UP
-         */
-        bindings = <&kp RIGHT>,
-                   <&kp LEFT>,
-                   <&kp DOWN>,
-                   <&kp UP>;
+        layer-count = <2>;
+
+        // DOWN UP FWD BACK
+        bindings = <
+            /* Layer 0: navigation */
+            &kp UP
+            &kp DOWN
+            &kp LEFT
+            &kp RIGHT
+
+            /* Layer 1: WASD */
+            &kp W
+            &kp S
+            &kp A
+            &kp D
+        >;
     };
 };
