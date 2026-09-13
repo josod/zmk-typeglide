@@ -3,18 +3,34 @@
 
 / {
     joystick_4way: joystick_4way {
-        compatible = "typeglide,joystick-4way";
-         #input-processor-cells = <0>;
+    compatible = "typeglide,joystick-4way";
 
-        bindings = <
-            &kp UP
-            &kp DOWN
-            &kp LEFT
-            &kp RIGHT
-        >;
+    #input-processor-cells = <0>;
 
-        threshold = <10>;
-    };
+    threshold = <10>;
+
+    /*
+     * Global mechanical rotation correction.
+     *
+     * Start at 0.
+     * Positive/negative values can be tested later.
+     */
+    rotation-deg = <0>;
+
+    /*
+     * Prevent rapid switching when moving near
+     * a 45-degree sector boundary.
+     */
+    hysteresis-deg = <10>;
+
+    /*
+     * RIGHT, LEFT, DOWN, UP
+     */
+    bindings = <&kp RIGHT>,
+               <&kp LEFT>,
+               <&kp DOWN>,
+               <&kp UP>;
+};
 
     keymap {
         compatible = "zmk,keymap";

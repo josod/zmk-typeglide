@@ -1,4 +1,3 @@
-
 description: Typeglide 4-way joystick input processor
 
 compatible: "typeglide,joystick-4way"
@@ -9,9 +8,23 @@ properties:
   threshold:
     type: int
     required: false
-    default: 15
+    default: 10
     description: >
-      Absolute joystick value required to leave the center deadzone.
+      Minimum joystick magnitude required to leave the center deadzone.
+
+  rotation-deg:
+    type: int
+    required: false
+    default: 0
+    description: >
+      Global joystick rotation correction in degrees.
+
+  hysteresis-deg:
+    type: int
+    required: false
+    default: 10
+    description: >
+      Angular hysteresis around the four sector boundaries.
 
   bindings:
     type: phandle-array
