@@ -79,7 +79,7 @@
             compatible = "zmk,input-split";
 
             reg = <0>;
-
+  //          status = "okay";
         };
 
     };

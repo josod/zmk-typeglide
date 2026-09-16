@@ -619,6 +619,11 @@ default:
     return ZMK_INPUT_PROC_CONTINUE;
 }
 
+LOG_INF("4WAY _____________________________________________________________ EVENT: type=%d code=%d value=%d",
+        event->type,
+        event->code,
+        event->value);
+
 if (!data->have_x || !data->have_y) {
     return ZMK_INPUT_PROC_STOP;
 }

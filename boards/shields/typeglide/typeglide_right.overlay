@@ -87,26 +87,15 @@
 };
 
 
+&right_joystick_split {
+    device = <&joystick>;
+};
+
+
 
 / {
-
-
-    /*
-
-    * Relay the complete joystick device (X + Y) to the
-     * central side as one input device.
-     *
-     * reg 0 is already used by the PMW3610.
-     */
-
- split_inputs {
-        #address-cells = <1>;
-        #size-cells = <0>;
-
-        right_joystick_split: right_joystick_split@1 {
-            compatible = "zmk,input-split";
-            reg = <1>;
-            device = <&joystick>;
-        };
+    joystick_debug_listener {
+        compatible = "zmk,input-listener";
+        device = <&joystick>;
     };
 };

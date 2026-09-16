@@ -80,11 +80,75 @@
  *     UP
  */
 
+
+
+ / {
+     joystick_4way_left: joystick_4way_left {
+        compatible = "typeglide,joystick-4way";
+
+        #input-processor-cells = <0>;
+
+//status = "disabled";
+        /*
+         * Signed analog value required to leave the
+         * center deadzone.
+         */
+        threshold = <20>;
+
+        layer-count = <2>;
+
+        // DOWN UP FWD BACK
+        bindings = <
+            /* Layer 0: navigation */
+            &kp DOWN
+            &kp UP
+            &kp RIGHT
+            &kp LEFT
+
+            /* Layer 1: WASD */
+            &kp W
+            &kp S
+            &kp A
+            &kp D
+        >;
+    };
+
+    joystick_4way_right: joystick_4way_right {
+        compatible = "typeglide,joystick-4way";
+
+        #input-processor-cells = <0>;
+
+//status = "disabled";
+        /*
+         * Signed analog value required to leave the
+         * center deadzone.
+         */
+        threshold = <20>;
+
+        layer-count = <2>;
+
+        // DOWN UP FWD BACK
+        bindings = <
+            /* Layer 0: navigation */
+            &kp DOWN
+            &kp UP
+            &kp RIGHT
+            &kp LEFT
+
+            /* Layer 1: WASD */
+            &kp W
+            &kp S
+            &kp A
+            &kp D
+        >;
+    };
+};
+
  / {
     joystick_listener {
         compatible = "zmk,input-listener";
         device = <&joystick>;
-        input-processors = <&joystick_4way>;
+        input-processors = <&joystick_4way_left>;
     };
 };
 
@@ -101,15 +165,7 @@
 
  / {
 
-    split_inputs {
-        #address-cells = <1>;
-        #size-cells = <0>;
 
-        right_joystick_split: right_joystick_split@1 {
-            compatible = "zmk,input-split";
-            reg = <1>;
-        };
-    };
 
     /*
      * Process the right joystick centrally.
@@ -118,10 +174,14 @@
      * input device, allowing joystick_4way to maintain the
      * correct X/Y state.
      */
-
-    right_joystick_listener {
+right_joystick_listener {
+    compatible = "zmk,input-listener";
+    device = <&right_joystick_split>;
+     input-processors = <&joystick_4way_right>;
+};
+    /*right_joystick_listener {
         compatible = "zmk,input-listener";
         device = <&right_joystick_split>;
-        input-processors = <&joystick_4way>;
-    };
+        input-processors = <&joystick_4way_right>;
+    };*/
 };

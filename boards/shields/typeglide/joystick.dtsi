@@ -93,33 +93,17 @@
         };
     };
 
-    joystick_4way: joystick_4way {
-        compatible = "typeglide,joystick-4way";
 
-        #input-processor-cells = <0>;
+};
 
-//status = "disabled";
-        /*
-         * Signed analog value required to leave the
-         * center deadzone.
-         */
-        threshold = <20>;
+/ {
+    split_inputs {
+        #address-cells = <1>;
+        #size-cells = <0>;
 
-        layer-count = <2>;
-
-        // DOWN UP FWD BACK
-        bindings = <
-            /* Layer 0: navigation */
-            &kp UP
-            &kp DOWN
-            &kp LEFT
-            &kp RIGHT
-
-            /* Layer 1: WASD */
-            &kp W
-            &kp S
-            &kp A
-            &kp D
-        >;
+        right_joystick_split: right_joystick_split@1 {
+            compatible = "zmk,input-split";
+            reg = <1>;
+        };
     };
 };

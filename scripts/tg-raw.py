@@ -18,7 +18,7 @@ ser = serial.Serial(
     timeout=0.05,
 )
 
-XY_RE = re.compile(r"x=(-?\d+)\s+y=(-?\d+)")
+XY_RE = re.compile(r"ADC_RAW\s+X=(-?\d+)\s+Y=(-?\d+)")
 
 # 0.5 s settling time + 1.5 s actual measurement
 SETTLE_TIME = 0.5
