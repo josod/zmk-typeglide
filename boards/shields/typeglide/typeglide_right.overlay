@@ -86,12 +86,13 @@
     device = <&pmw3610>;
 };
 
+/*
 
 &right_joystick_split {
     device = <&joystick>;
 };
-
-
+*/
+/*
 
 / {
     joystick_debug_listener {
@@ -99,3 +100,4 @@
         device = <&joystick>;
     };
 };
+*/

@@ -1,5 +1,6 @@
 
 
+
 #include <zephyr/dt-bindings/input/input-event-codes.h>
 #include <zephyr/dt-bindings/adc/adc.h>
 #include <zephyr/dt-bindings/adc/nrf-saadc.h>
@@ -61,22 +62,14 @@
         compatible = "analog-axis";
         status = "okay";
 
-        /*
-         * 50 Hz joystick sampling.
-         */
+
         poll-period-ms = <20>;
 
-        /*
-         * Produce signed values approximately:
-         *
-         * center -> 0
-         * minimum -> -2048
-         * maximum -> +2047
-         */
+
 
         joystick_x: axis_x {
             io-channels = <&adc 0>;
-
+//status = "disabled";
             in-min = <(JOYSTICK_CENTER_X - JOYSTICK_SWING_X)>;
             in-max = <(JOYSTICK_CENTER_X + JOYSTICK_SWING_X)>;
 
@@ -85,7 +78,7 @@
 
         joystick_y: axis_y {
             io-channels = <&adc 1>;
-
+//status = "disabled";
             in-min = <(JOYSTICK_CENTER_Y - JOYSTICK_SWING_Y)>;
             in-max = <(JOYSTICK_CENTER_Y + JOYSTICK_SWING_Y)>;
 
@@ -101,9 +94,14 @@
         #address-cells = <1>;
         #size-cells = <0>;
 
-        right_joystick_split: right_joystick_split@1 {
+        right_joystick_split: right_joystick_split@2 {
             compatible = "zmk,input-split";
-            reg = <1>;
+            reg = <2>;
+              device = <&joystick>;
+              //device = <&kscan0>;
+               status = "disabled";
+               //status = "okay";
+
         };
     };
 };
