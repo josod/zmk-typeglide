@@ -686,8 +686,9 @@ const struct device *dev) {
 struct joystick_4way_data *data =
     dev->data;
 
+
 const struct device *analog =
-    DEVICE_DT_GET(DT_NODELABEL(joystick));
+    DEVICE_DT_GET(DT_NODELABEL(analog_joystick));
 
 if (!device_is_ready(analog)) {
     LOG_ERR("4WAY: analog-axis device not ready");

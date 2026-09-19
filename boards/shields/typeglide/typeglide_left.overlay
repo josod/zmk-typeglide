@@ -68,6 +68,78 @@
     };
 };
 
+/ {
+    joystick_4way_left: joystick_4way_left {
+        compatible = "typeglide,joystick-4way";
+        #input-processor-cells = <0>;
+
+        status = "okay";
+
+        threshold = <10>;
+        rotation-deg = <0>;
+        hysteresis-deg = <10>;
+
+        layer-count = <1>;
+
+        bindings = <
+            &kp UP
+            &kp DOWN
+            &kp LEFT
+            &kp RIGHT
+        >;
+    };
+
+    joystick_4way_right: joystick_4way_right {
+        compatible = "typeglide,joystick-4way";
+        #input-processor-cells = <0>;
+
+        status = "okay";
+
+        threshold = <10>;
+        rotation-deg = <0>;
+        hysteresis-deg = <10>;
+
+        layer-count = <1>;
+
+        bindings = <
+            &kp UP
+            &kp DOWN
+            &kp LEFT
+            &kp RIGHT
+        >;
+    };
+};
+
+/ {
+    joystick_left_listener {
+        compatible = "zmk,input-listener";
+        device = <&analog_joystick>;
+        input-processors = <&joystick_4way_left>;
+    };
+};
+
+/ {
+    joystick_right_listener {
+        compatible = "zmk,input-listener";
+        device = <&right_joystick_split>;
+        input-processors = <&joystick_4way_right>;
+    };
+};
+
+&right_joystick_split {
+    status = "okay";
+    /delete-property/ device;
+};
+
+
+
+
+
+
+
+
+
+
 
 /*
  * Local joystick.

@@ -58,9 +58,10 @@
         io-channels = <&adc 0>, <&adc 1>;
     };
 
-    joystick: joystick {
+    analog_joystick: analog_joystick {
         compatible = "analog-axis";
         status = "okay";
+        // status = "disabled";
 
 
         poll-period-ms = <20>;
@@ -87,6 +88,9 @@
     };
 
 
+
+
+
 };
 
 / {
@@ -97,10 +101,10 @@
         right_joystick_split: right_joystick_split@2 {
             compatible = "zmk,input-split";
             reg = <2>;
-              device = <&joystick>;
+              device = <&analog_joystick>;
               //device = <&kscan0>;
-               status = "disabled";
-               //status = "okay";
+               //status = "disabled";
+               status = "okay";
 
         };
     };
