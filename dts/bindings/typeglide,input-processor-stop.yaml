@@ -1,0 +1,5 @@
+description: Input processor that stops input events
+
+compatible: "typeglide,input-processor-stop"
+
+include: ip_zero_param.yaml

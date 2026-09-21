@@ -4,7 +4,7 @@
 
 #include <dt-bindings/gpio/gpio.h>
 #include <input/processors/rotate_plane.dtsi>
-
+#include <input_processor_stop.dtsi>
 
 /*
  * Left half
@@ -57,7 +57,12 @@
 
 &m_split_listener {
     status = "okay";
-    input-processors = <&zip_rotate_pointer>;
+    input-processors = <&mouse_input_stop>;
+
+    layer_1 {
+        layers = <1>;
+        input-processors = <&zip_rotate_pointer>;
+    };
 };
 
 
@@ -75,17 +80,22 @@
 
         status = "okay";
 
-        threshold = <10>;
+        threshold = <20>;
         rotation-deg = <0>;
         hysteresis-deg = <10>;
 
-        layer-count = <1>;
+        layer-count = <2>;
 
         bindings = <
             &kp UP
             &kp DOWN
             &kp LEFT
             &kp RIGHT
+
+            &kp W
+            &kp S
+            &kp A
+            &kp D
         >;
     };
 
@@ -95,17 +105,22 @@
 
         status = "okay";
 
-        threshold = <10>;
+        threshold = <20>;
         rotation-deg = <0>;
         hysteresis-deg = <10>;
 
-        layer-count = <1>;
+        layer-count = <2>;
 
         bindings = <
             &kp UP
             &kp DOWN
             &kp LEFT
             &kp RIGHT
+
+            &kp R
+            &kp Q
+            &kp P
+            &kp H
         >;
     };
 };

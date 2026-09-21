@@ -1,0 +1,9 @@
+#include <dt-bindings/input/input-event-codes.h>
+
+/ {
+    mouse_layer_gate: mouse_layer_gate {
+        compatible = "typeglide,mouse-layer-gate";
+        #input-processor-cells = <0>;
+        layer = <1>;
+    };
+};

@@ -494,13 +494,15 @@ static int joystick_invoke(
 #endif
     };
 
-    LOG_DBG(
-        "4WAY: %s direction=%d binding=%d layer=%d",
+    LOG_INF(
+        "4WAY: %s direction=%d binding=%d layer=%d vpos=%d listener=%d",
         pressed ? "PRESS" : "RELEASE",
         direction,
         binding_index,
         pressed ? zmk_keymap_highest_layer_active()
-                : data->active_layer);
+                : data->active_layer,
+        behavior_event.position,
+        state->input_device_index);
 
     int ret =
         zmk_behavior_invoke_binding(

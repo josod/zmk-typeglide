@@ -1,0 +1,10 @@
+description: Gate input events to a specific ZMK keymap layer
+
+compatible: "typeglide,mouse-layer-gate"
+
+include: ip_zero_param.yaml
+
+properties:
+  layer:
+    type: int
+    required: true

@@ -1,0 +1,7 @@
+/ {
+    mouse_input_stop: mouse_input_stop {
+        compatible = "typeglide,input-processor-stop";
+        #input-processor-cells = <0>;
+        status = "okay";
+    };
+};
