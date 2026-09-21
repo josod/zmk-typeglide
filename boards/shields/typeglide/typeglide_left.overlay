@@ -5,7 +5,8 @@
 #include <dt-bindings/gpio/gpio.h>
 #include <input/processors/rotate_plane.dtsi>
 #include <input_processor_stop.dtsi>
-
+#include <behaviors/mouse_scroll.dtsi>
+#include <dt-bindings/zmk/pointing.h>
 /*
  * Left half
  *
@@ -109,7 +110,7 @@
         rotation-deg = <0>;
         hysteresis-deg = <10>;
 
-        layer-count = <2>;
+        layer-count = <3>;
 
         bindings = <
             &kp UP
@@ -121,6 +122,11 @@
             &kp Q
             &kp P
             &kp H
+
+            &msc SCRL_UP
+            &msc SCRL_DOWN
+            &msc SCRL_LEFT
+            &msc SCRL_RIGHT
         >;
     };
 };

@@ -4,7 +4,7 @@
 
 
 #define M_L 1
-
+#define S_L 2
 
 / {
 
@@ -15,7 +15,7 @@
         default_layer {
             bindings = <
                 &kp A  &kp B  &kp C      &kp D  &kp E  &kp F
-                &kp G  &kp H  &kp I      &kp J  &kp K  &kp L
+                &kp G  &mo S_L  &kp I      &kp J  &kp K  &kp L
          &kp S  &kp M  &kp N  &kp O      &kp P  &kp Q  &kp R  &kp V
                               &kp T      &mo M_L
             >;
@@ -30,6 +30,15 @@
             >;
         };
 
+
+        scroll_layer {
+            bindings = <
+                &none &none &none        &none &none &none
+                &none &none &none        &none &none &none
+          &none &none &none &none        &none &none &none &none
+                            &none        &none
+            >;
+        };
 
     };
 };
