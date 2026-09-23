@@ -20,9 +20,7 @@
 #include <zmk/virtual_key_position.h>
 #include <zephyr/input/input_analog_axis.h>
 
-static void joystick_raw_cb(const struct device *dev,
-int channel,
-int16_t raw_val);
+//static void joystick_raw_cb(const struct device *dev,int channel,int16_t raw_val);
 
 LOG_MODULE_REGISTER(typeglide_joystick_4way, CONFIG_ZMK_LOG_LEVEL);
 
@@ -319,6 +317,7 @@ const struct joystick_4way_data *data) {
 int32_t dx = data->x - JOYSTICK_CENTER_X;
 int32_t dy = data->y - JOYSTICK_CENTER_Y;
 
+/*
 LOG_DBG(
     "4WAY: raw x=%d y=%d dx=%d dy=%d threshold=%d",
     data->x,
@@ -326,6 +325,8 @@ LOG_DBG(
     dx,
     dy,
     cfg->threshold);
+*/
+
 
 int32_t magnitude_squared =
     dx * dx + dy * dy;
@@ -354,12 +355,13 @@ rotate_vector(
     cfg->rotation_deg,
     &rx,
     &ry);
-
+/*
 LOG_DBG(
     "4WAY: rotated x=%d y=%d rotation=%d",
     rx,
     ry,
     cfg->rotation_deg);
+*/
 
 if (data->direction != JOY_NONE) {
 
@@ -375,12 +377,13 @@ if (data->direction != JOY_NONE) {
 
 enum joystick_direction direction =
     direction_from_vector(rx, ry);
-
+/*
 LOG_DBG(
     "4WAY: vector rx=%d ry=%d -> direction=%d",
     rx,
     ry,
     direction);
+*/
 
 return direction;
 
@@ -430,10 +433,10 @@ static int joystick_invoke(
          * fall back to layer 0 for now.
          */
         if (layer >= cfg->layer_count) {
-            LOG_DBG(
+           /*  LOG_DBG(
                 "4WAY: layer %d has no joystick mapping, using layer 0",
                 layer);
-
+*/
             layer = 0;
         }
 
@@ -493,7 +496,7 @@ static int joystick_invoke(
         .source = ZMK_POSITION_STATE_CHANGE_SOURCE_LOCAL,
 #endif
     };
-
+/*
     LOG_INF(
         "4WAY: %s direction=%d binding=%d layer=%d vpos=%d listener=%d",
         pressed ? "PRESS" : "RELEASE",
@@ -503,6 +506,7 @@ static int joystick_invoke(
                 : data->active_layer,
         behavior_event.position,
         state->input_device_index);
+*/
 
     int ret =
         zmk_behavior_invoke_binding(
@@ -568,10 +572,11 @@ if (new_direction != JOY_NONE) {
         return ret;
     }
 }
-
+/*
 LOG_DBG(
     "4WAY: direction changed -> %d",
     new_direction);
+*/
 
 return 0;
 
@@ -620,11 +625,12 @@ case INPUT_ABS_Y:
 default:
     return ZMK_INPUT_PROC_CONTINUE;
 }
-
+/*
 LOG_INF("4WAY _____________________________________________________________ EVENT: type=%d code=%d value=%d",
         event->type,
         event->code,
         event->value);
+*/
 
 if (!data->have_x || !data->have_y) {
     return ZMK_INPUT_PROC_STOP;
@@ -641,12 +647,13 @@ enum joystick_direction direction =
     joystick_get_direction(
         cfg,
         data);
-
+/*
 LOG_DBG(
     "4WAY: x=%d y=%d -> direction=%d",
     data->x,
     data->y,
     direction);
+*/
 
 int ret = joystick_4way_change_direction(
     dev,
@@ -681,51 +688,48 @@ joystick_4way_api = {
 /* Initialization                                                            */
 /* ------------------------------------------------------------------------- */
 
-static int joystick_4way_init(
-const struct device *dev) {
+static int joystick_4way_init(const struct device *dev) {
 
 
-struct joystick_4way_data *data =
-    dev->data;
+    struct joystick_4way_data *data =
+        dev->data;
 
+/*
+    const struct device *analog =
+        DEVICE_DT_GET(DT_NODELABEL(analog_joystick));
 
-const struct device *analog =
-    DEVICE_DT_GET(DT_NODELABEL(analog_joystick));
+    if (!device_is_ready(analog)) {
+        LOG_ERR("4WAY: analog-axis device not ready");
+        return -ENODEV;
+    }
+*/
 
-if (!device_is_ready(analog)) {
-    LOG_ERR("4WAY: analog-axis device not ready");
-    return -ENODEV;
-}
+//analog_axis_set_raw_data_cb(    analog, joystick_raw_cb);
 
-analog_axis_set_raw_data_cb(
-    analog,
-    joystick_raw_cb);
+    data->x = JOYSTICK_CENTER_X;
+    data->y = JOYSTICK_CENTER_Y;
 
-data->x = JOYSTICK_CENTER_X;
-data->y = JOYSTICK_CENTER_Y;
+    data->have_x = false;
+    data->have_y = false;
+    data->x_updated = false;
+    data->y_updated = false;
+    data->direction = JOY_NONE;
+    data->active_binding_index = -1;
+    data->active_layer = 0;
 
-data->have_x = false;
-data->have_y = false;
-data->x_updated = false;
-data->y_updated = false;
-data->direction = JOY_NONE;
-data->active_binding_index = -1;
-data->active_layer = 0;
+    const struct joystick_4way_config *cfg =
+        dev->config;
 
-const struct joystick_4way_config *cfg =
-    dev->config;
+    LOG_INF(
+        "4WAY: initialized threshold=%d rotation=%d hysteresis=%d",
+        cfg->threshold,
+        cfg->rotation_deg,
+        cfg->hysteresis_deg);
 
-LOG_INF(
-    "4WAY: initialized threshold=%d rotation=%d hysteresis=%d",
-    cfg->threshold,
-    cfg->rotation_deg,
-    cfg->hysteresis_deg);
-
-return 0;
-
+    return 0;
 
 }
-
+/*
 static void joystick_raw_cb(
 const struct device *dev,
 int channel,
@@ -741,6 +745,7 @@ LOG_INF(
 
 
 }
+*/
 
 /* ------------------------------------------------------------------------- */
 /* Device tree instantiation                                                */

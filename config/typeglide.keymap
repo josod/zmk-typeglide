@@ -3,39 +3,124 @@
 #include <dt-bindings/zmk/pointing.h>
 
 
-#define M_L 1
-#define S_L 2
+#define A1_L 0   // Alfa 1
+#define A2_L 1   // Alfa 2
+#define SC_L 2
+//#define X_L 3
+//#define Y_L 4
+#define MO_L 3   // Mouse  REMEMBER: change layer active on left overlay
+
+
+#define EURKEY(name, key)                                      \
+    name: name {                                                \
+        compatible = "zmk,behavior-macro";                     \
+        #binding-cells = <0>;                                  \
+        bindings =                                               \
+            <&macro_press &kp RALT>,                            \
+            <&macro_tap &kp key>,                              \
+            <&macro_release &kp RALT>;                         \
+    };
 
 / {
+
+ //          SIDE:L(left)/R(right)
+ //          ROW:T(top)/M(middle)/B(bottom)/M(mouse)
+ //          FINGER:P(pinky)/R(ring)/M(middle)/I(index)/T(thumb)
+ //
+ //          POS: SIDE-ROW-FINGER
+ //
+ //          bindings = <
+ //               LTR    LTM    LTI                            RTI    RTM   RTR
+ //               LMR    LMM    LMI                            RMI    RMM   RMR
+ //          LBP  LBR    LBM    LBI      Joy        Joy        RBI    RBM   RBR   RBP
+ //                             LMT                            RMT
+
+
+
+    behaviors {
+
+        TPHLS: TPHLS {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "balanced";
+            tapping-term-ms = <200>;
+            bindings = <&mo>, <&sl>;
+        };
+
+        TPHL: TPHL {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "balanced";
+            tapping-term-ms = <200>;
+            bindings = <&mo>, <&kp>;
+        };
+
+
+    };
+
+    macros {
+        EURKEY(swe_aa, W)
+        EURKEY(swe_ae, A)
+        EURKEY(swe_oe, O)
+    };
 
 
     keymap {
         compatible = "zmk,keymap";
 
-        default_layer {
+
+        A1_layer {
             bindings = <
-                &kp A  &kp B  &kp C      &kp D  &kp E  &kp F
-                &kp G  &mo S_L  &kp I      &kp J  &kp K  &kp L
-         &kp S  &kp M  &kp N  &kp O      &kp P  &kp Q  &kp R  &kp V
-                              &kp T      &mo M_L
+                &kp L    &kp D    &kp G                    &kp F    &kp O       &kp U
+                &kp R    &kp T    &kp S                    &kp H    &kp A       &kp E
+       &kp N    &kp W    &kp M    &kp C                    &kp P    &kp COMMA   &kp DOT   &lt MO_L I
+                                  &TPHL SC_L SPACE         &TPHLS SC_L A2_L
             >;
         };
 
-        mouse_layer {
+        A2_layer {
             bindings = <
-                &none &none &none        &none  &none &none
-                &none &none &none        &mkp LCLK  &mkp RCLK  &none
+                &none    &kp Q    &kp X         &swe_aa      &swe_ae      &swe_oe
+                &kp J    &kp B    &kp Y         &kp V        &kp K        &kp DQT
+       &kp Z    &none    &none    &none         &kp MINUS    &kp COLON    &kp UNDER    &kp SEMI
+                                  &none         &none
+            >;
+        };
+
+
+        SC_layer {
+            bindings = <
+                &none &none &kp N4       &none &none &none
+                &none &none &none        &none &none &none
           &none &none &none &none        &none &none &none &none
                             &none        &none
             >;
         };
 
-
-        scroll_layer {
+/*
+        X_layer {
             bindings = <
-                &none &none &none        &none &none &none
+                &kp X &none &none        &none &none &none
                 &none &none &none        &none &none &none
           &none &none &none &none        &none &none &none &none
+                            &none        &none
+            >;
+        };
+
+        Y_layer {
+            bindings = <
+                &kp Y &none &none        &none &none &none
+                &none &none &none        &none &none &none
+          &none &none &none &none        &none &none &none &mo MO_L
+                            &none        &none
+            >;
+        };
+*/
+        MO_layer {
+            bindings = <
+                &none &none &none        &none      &none       &none
+                &none &none &none        &mkp LCLK  &mkp RCLK   &none
+          &none &none &none &none        &none      &none &none &none
                             &none        &none
             >;
         };

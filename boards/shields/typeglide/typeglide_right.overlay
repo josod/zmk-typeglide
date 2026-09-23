@@ -84,6 +84,8 @@
 
 &m_split_input {
     device = <&pmw3610>;
+   // status = "disabled";
+    status = "okay";
 };
 
 /*
@@ -101,3 +103,14 @@
     };
 };
 */
+
+
+&analog_joystick {
+    //status = "disabled";
+    status = "okay";
+};
+
+&right_joystick_split {
+    //status = "disabled";
+    status = "okay";
+};

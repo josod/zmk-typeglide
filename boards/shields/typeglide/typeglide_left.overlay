@@ -58,10 +58,11 @@
 
 &m_split_listener {
     status = "okay";
+    //status = "disabled";
     input-processors = <&mouse_input_stop>;
 
-    layer_1 {
-        layers = <1>;
+    layer_active {
+        layers = <3>;
         input-processors = <&zip_rotate_pointer>;
     };
 };
@@ -74,6 +75,13 @@
     };
 };
 
+//      Joystick:                  up
+//         screen  <=   forward         backward
+//                                down
+//
+//         bind order: down up forward backward
+
+
 / {
     joystick_4way_left: joystick_4way_left {
         compatible = "typeglide,joystick-4way";
@@ -81,17 +89,17 @@
 
         status = "okay";
 
-        threshold = <20>;
+        threshold = <30>;
         rotation-deg = <0>;
         hysteresis-deg = <10>;
 
         layer-count = <2>;
 
         bindings = <
-            &kp UP
-            &kp DOWN
-            &kp LEFT
-            &kp RIGHT
+            &kp N1
+            &kp N2
+            &kp N3
+            &kp N4
 
             &kp W
             &kp S
@@ -106,17 +114,17 @@
 
         status = "okay";
 
-        threshold = <20>;
+        threshold = <30>;
         rotation-deg = <0>;
         hysteresis-deg = <10>;
 
         layer-count = <3>;
 
         bindings = <
-            &kp UP
-            &kp DOWN
-            &kp LEFT
-            &kp RIGHT
+            &kp N5
+            &kp N6
+            &kp N7
+            &kp N8
 
             &kp R
             &kp Q
@@ -127,6 +135,7 @@
             &msc SCRL_DOWN
             &msc SCRL_LEFT
             &msc SCRL_RIGHT
+
         >;
     };
 };
@@ -153,12 +162,22 @@
 };
 
 
+&analog_joystick {
+    //status = "disabled";
+    status = "okay";
+};
 
 
+/ {
+    joystick_left_listener {
+      //  status = "disabled";
+        status = "okay";
+    };
+};
 
-
-
-
+&joystick_4way_left {
+    status = "okay";
+};
 
 
 
