@@ -96,15 +96,16 @@
         layer-count = <2>;
 
         bindings = <
-            &kp N1
-            &kp N2
-            &kp N3
-            &kp N4
+            &msc SCRL_DOWN
+            &msc SCRL_UP
+            &caps_word_or_scroll_right
+            &msc SCRL_LEFT
 
-            &kp W
-            &kp S
-            &kp A
-            &kp D
+            &msc SCRL_DOWN
+            &msc SCRL_UP
+            &msc SCRL_RIGHT
+            &msc SCRL_LEFT
+
         >;
     };
 
@@ -118,23 +119,15 @@
         rotation-deg = <0>;
         hysteresis-deg = <10>;
 
-        layer-count = <3>;
+        layer-count = <1>;
 
         bindings = <
-            &kp N5
-            &kp N6
-            &kp N7
-            &kp N8
+             &kp DOWN
+             &kp UP
+             &kp RIGHT
+             &kp LEFT
 
-            &kp R
-            &kp Q
-            &kp P
-            &kp H
 
-            &msc SCRL_UP
-            &msc SCRL_DOWN
-            &msc SCRL_LEFT
-            &msc SCRL_RIGHT
 
         >;
     };

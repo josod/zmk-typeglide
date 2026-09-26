@@ -1,6 +1,9 @@
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/pointing.h>
+#include <behaviors/caps_word.dtsi>
+
+
 
 // Left hand: 11 keys
 #define LTR  0   // Left Top Ring
@@ -64,7 +67,14 @@
         bindings = <behavior>; \
     };
 
-
+#define HOLD_TAP(name, flavor_, tap_term, bind0, bind1) \
+    name: name { \
+        compatible = "zmk,behavior-hold-tap"; \
+        #binding-cells = <2>; \
+        flavor = flavor_; \
+        tapping-term-ms = <tap_term>; \
+        bindings = bind0, bind1; \
+    };
 
 / {
 
@@ -100,8 +110,17 @@
             bindings = <&mo>, <&kp>;
         };
 
+        HOLD_TAP(HT_KP_KP_BAL, "balanced", 200, <&kp>, <&kp>)
 
+        caps_word_or_scroll_right: caps_word_or_scroll_right {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&msc SCRL_RIGHT>, <&caps_word>;
+            mods = <(MOD_LSFT | MOD_RSFT)>;
+        };
     };
+
+
 
     macros {
         EURKEY(swe_aa, W)
@@ -119,21 +138,24 @@
         compatible = "zmk,keymap";
 
 
+// ------------------------------------------LEFT-------------------------------------------------------<>-----------------------------------------------RIGHT-----------------------------------------------------------------
+// Pinky                    Ring                        Middle                      Index               <>      Index                       Middle                      Ring                        Pinky
+//------------------------------------------------------------------------------------------------------<>----------------------------------------------------------------------------------------------------------------------
         A1_layer {
             bindings = <
-                &kp L    &kp D    &kp G                    &kp F    &kp O       &kp U
-                &kp R    &kp T    &kp S                    &kp H    &kp A       &kp E
-       &kp N    &kp W    &kp M    &kp C                    &kp P    &kp COMMA   &kp DOT   &lt MO_L I
-                                  &TPHL SC_L SPACE         &TPHLS SC_L A2_L
+                            &caps_word                  &kp D                       &kp G                       &kp F                       &kp O                       &kp U
+                            &HT_KP_KP_BAL LALT   R      &HT_KP_KP_BAL LCTRL  T      &HT_KP_KP_BAL LSHIFT S      &HT_KP_KP_BAL RSHIFT H      &HT_KP_KP_BAL RCTRL  A      &HT_KP_KP_BAL RALT   E
+&kp N                       &kp W                       &kp M                       &kp C                       &kp P                       &kp COMMA                   &kp DOT                     &lt MO_L I
+                                                                                    &TPHL SC_L SPACE            &TPHLS SC_L A2_L
             >;
         };
 
         A2_layer {
             bindings = <
-                &none    &kp Q    &kp X         &swe_aa      &swe_ae      &swe_oe
-                &kp J    &kp B    &kp Y         &kp V        &kp K        &kp DQT
-       &kp Z    &none    &none    &none         &kp MINUS    &kp COLON    &kp UNDER    &kp SEMI
-                                  &none         &none
+                            &none                       &kp Q                       &kp X                       &swe_aa                     &swe_ae                     &swe_oe
+                            &kp J                       &kp B                       &kp Y                       &kp V                       &kp K                       &kp DQT
+&kp Z                       &none                       &none                       &none                       &kp MINUS                   &kp COLON                   &kp UNDER                   &kp SEMI
+                                                                                    &none                       &none
             >;
         };
 
@@ -176,4 +198,9 @@
         };
 
     };
+
+};
+
+&caps_word {
+    continue-list = <SPACE UNDERSCORE BSPC DEL>;
 };

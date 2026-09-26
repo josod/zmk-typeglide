@@ -21,16 +21,21 @@ fi
 
 # Patch devcontainer.json to use bind mounts
 DEVCONTAINER="$ZMK_DIR/.devcontainer/devcontainer.json"
-if grep -q "zmk-config,target" "$DEVCONTAINER" && grep -q "type=volume" "$DEVCONTAINER"; then
-    echo "Patching devcontainer.json to use bind mounts..."
+
+if ! grep -q "source=$TYPEGLIDE_DIR,target=/workspaces/zmk-config" "$DEVCONTAINER"; then
+    echo "Patching zmk-config mount..."
     sed -i \
         "s|type=volume,source=zmk-config,target=/workspaces/zmk-config|type=bind,source=$TYPEGLIDE_DIR,target=/workspaces/zmk-config|" \
         "$DEVCONTAINER"
+fi
+
+if ! grep -q "source=$TG_DIR,target=/workspaces/zmk-modules" "$DEVCONTAINER"; then
+    echo "Patching zmk-modules mount..."
     sed -i \
         "s|type=volume,source=zmk-modules,target=/workspaces/zmk-modules|type=bind,source=$TG_DIR,target=/workspaces/zmk-modules|" \
         "$DEVCONTAINER"
-    echo "Patched."
 fi
+
 
 # Check if container is already running
 CONTAINER=$(docker ps \
