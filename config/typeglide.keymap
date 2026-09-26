@@ -2,7 +2,41 @@
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/pointing.h>
 
+// Left hand: 11 keys
+#define LTR  0   // Left Top Ring
+#define LTM  1   // Left Top Middle
+#define LTI  2   // Left Top Index
 
+#define LMR  6   // Left Middle Ring
+#define LMM  7   // Left Middle Middle
+#define LMI  8   // Left Middle Index
+
+#define LBP 12   // Left Bottom Pinky
+#define LBR 13   // Left Bottom Ring
+#define LBM 14   // Left Bottom Middle
+#define LBI 15   // Left Bottom Index
+
+#define LMT 20   // Left Middle Thumb
+
+
+// Right hand: 11 keys
+#define RTI  3   // Right Top Index
+#define RTM  4   // Right Top Middle
+#define RTR  5   // Right Top Ring
+
+#define RMI  9   // Right Middle Index
+#define RMM 10   // Right Middle Middle
+#define RMR 11   // Right Middle Ring
+
+#define RBI 16   // Right Bottom Index
+#define RBM 17   // Right Bottom Middle
+#define RBR 18   // Right Bottom Ring
+#define RBP 19   // Right Bottom Pinky
+
+#define RMT 21   // Right Middle Thumb
+
+
+// Layers
 #define A1_L 0   // Alfa 1
 #define A2_L 1   // Alfa 2
 #define SC_L 2
@@ -20,6 +54,17 @@
             <&macro_tap &kp key>,                              \
             <&macro_release &kp RALT>;                         \
     };
+
+
+#define COMBO(name, pos0, pos1, behavior, ...) \
+    name { \
+        timeout-ms = <50>; \
+        key-positions = <pos0 pos1>; \
+        layers = <__VA_ARGS__>; \
+        bindings = <behavior>; \
+    };
+
+
 
 / {
 
@@ -64,6 +109,11 @@
         EURKEY(swe_oe, O)
     };
 
+    combos {
+        compatible = "zmk,combos";
+
+        COMBO(_backspace, RMM, RMR, &kp BACKSPACE, A1_L)
+    };
 
     keymap {
         compatible = "zmk,keymap";
@@ -118,7 +168,7 @@
 */
         MO_layer {
             bindings = <
-                &none &none &none        &none      &none       &none
+                &none &kp N7  &none        &none      &none       &none
                 &none &none &none        &mkp LCLK  &mkp RCLK   &none
           &none &none &none &none        &none      &none &none &none
                             &none        &none
