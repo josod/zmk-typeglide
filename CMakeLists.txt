@@ -8,10 +8,12 @@ zephyr_library_sources(
     src/adc_debug.c
     src/input_processor_stop.c
     src/events/joystick_state_changed.c
+
 )
 
 
 zephyr_library_sources_ifdef(
     CONFIG_ZMK_SPLIT_ROLE_CENTRAL
     src/tg_gesture.c
+    src/events/gesture_timeout.c
 )
