@@ -112,11 +112,15 @@
 
         HOLD_TAP(HT_KP_KP_BAL, "balanced", 200, <&kp>, <&kp>)
 
-        caps_word_or_scroll_right: caps_word_or_scroll_right {
-            compatible = "zmk,behavior-mod-morph";
+
+
+        tg_caps_word_or_scroll: tg_caps_word_or_scroll {
+            compatible = "typeglide,caps-word-or-scroll";
             #binding-cells = <0>;
+
             bindings = <&msc SCRL_RIGHT>, <&caps_word>;
             mods = <(MOD_LSFT | MOD_RSFT)>;
+            timeout-ms = <5000>;
         };
     };
 

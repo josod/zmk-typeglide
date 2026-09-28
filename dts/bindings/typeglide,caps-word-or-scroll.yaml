@@ -1,0 +1,18 @@
+description: Caps Word or scroll behavior with delayed modifier decision
+compatible: "typeglide,caps-word-or-scroll"
+
+include: zero_param.yaml
+
+properties:
+  bindings:
+    type: phandle-array
+    required: true
+
+  mods:
+    type: int
+    required: true
+
+  timeout-ms:
+    type: int
+    required: false
+    default: 300

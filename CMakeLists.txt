@@ -14,6 +14,6 @@ zephyr_library_sources(
 
 zephyr_library_sources_ifdef(
     CONFIG_ZMK_SPLIT_ROLE_CENTRAL
-    src/tg_gesture.c
     src/events/gesture_timeout.c
+    src/behaviors/behavior_caps_word_or_scroll.c
 )

@@ -19,7 +19,7 @@
 #include <zmk/behavior.h>
 #include <zmk/virtual_key_position.h>
 #include <zephyr/input/input_analog_axis.h>
-#include <typeglide/events/joystick_state_changed.h>
+//#include <typeglide/events/joystick_state_changed.h>
 
 
 //static void joystick_raw_cb(const struct device *dev,int channel,int16_t raw_val);
@@ -27,6 +27,13 @@
 LOG_MODULE_REGISTER(typeglide_joystick_4way, CONFIG_ZMK_LOG_LEVEL);
 
 
+enum joystick_direction {
+    JOY_NONE = 0,
+    JOY_UP,
+    JOY_DOWN,
+    JOY_FORWARD,
+    JOY_BACKWARD,
+};
 
 struct joystick_4way_config {
 int32_t threshold;
@@ -537,7 +544,7 @@ if (new_direction == data->direction) {
 }
 
 if (data->direction != JOY_NONE) {
-/*
+
     int ret = joystick_invoke(
         dev,
         cfg,
@@ -549,19 +556,19 @@ if (data->direction != JOY_NONE) {
     if (ret < 0) {
         return ret;
     }
-    */
+
 }
 
 data->direction = new_direction;
-
+/*
 raise_typeglide_joystick_state_changed(
     (struct typeglide_joystick_state_changed){
         .direction = new_direction,
     });
-
+*/
 
 if (new_direction != JOY_NONE) {
-/*
+
     int ret = joystick_invoke(
         dev,
         cfg,
@@ -574,7 +581,7 @@ if (new_direction != JOY_NONE) {
         data->direction = JOY_NONE;
         return ret;
     }
-    */
+
 }
 /*
 LOG_DBG(
