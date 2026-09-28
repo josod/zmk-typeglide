@@ -14,7 +14,7 @@
 
 
 / {
-    kscan0: kscan {
+    kscan_matrix: kscan_matrix {
         compatible = "zmk,kscan-gpio-matrix";
         wakeup-source;
         diode-direction = "row2col";
@@ -31,6 +31,32 @@
             , <&pro_micro 9  (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  // col 1 — middle
             , <&pro_micro 10 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  // col 2 — ring
             ;
+    };
+
+    joystick_sw_right: joystick_sw_right {
+        compatible = "zmk,kscan-gpio-direct";
+        wakeup-source;
+
+        input-gpios =
+            <&pro_micro 16 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+    };
+
+    kscan0: kscan {
+        compatible = "zmk,kscan-composite";
+        wakeup-source;
+
+        rows = <4>;
+        columns = <6>;
+
+        matrix {
+            kscan = <&kscan_matrix>;
+        };
+
+        joystick {
+            kscan = <&joystick_sw_right>;
+            row-offset = <3>;
+            col-offset = <1>;
+        };
     };
 };
 

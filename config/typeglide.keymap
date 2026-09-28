@@ -120,7 +120,7 @@
 
             bindings = <&msc SCRL_RIGHT>, <&caps_word>;
             mods = <(MOD_LSFT | MOD_RSFT)>;
-            timeout-ms = <5000>;
+            timeout-ms = <300>;
         };
     };
 
@@ -150,7 +150,7 @@
                             &caps_word                  &kp D                       &kp G                       &kp F                       &kp O                       &kp U
                             &HT_KP_KP_BAL LALT   R      &HT_KP_KP_BAL LCTRL  T      &HT_KP_KP_BAL LSHIFT S      &HT_KP_KP_BAL RSHIFT H      &HT_KP_KP_BAL RCTRL  A      &HT_KP_KP_BAL RALT   E
 &kp N                       &kp W                       &kp M                       &kp C                       &kp P                       &kp COMMA                   &kp DOT                     &lt MO_L I
-                                                                                    &TPHL SC_L SPACE            &TPHLS SC_L A2_L
+                                                        &TPHL SC_L SPACE            &kp X                       &kp Y                       &TPHLS SC_L A2_L
             >;
         };
 
@@ -159,7 +159,7 @@
                             &none                       &kp Q                       &kp X                       &swe_aa                     &swe_ae                     &swe_oe
                             &kp J                       &kp B                       &kp Y                       &kp V                       &kp K                       &kp DQT
 &kp Z                       &none                       &none                       &none                       &kp MINUS                   &kp COLON                   &kp UNDER                   &kp SEMI
-                                                                                    &none                       &none
+                                                        &none                       &none                       &none                       &none
             >;
         };
 
@@ -169,7 +169,7 @@
                 &none &none &kp N4       &none &none &none
                 &none &none &none        &none &none &none
           &none &none &none &none        &none &none &none &none
-                            &none        &none
+                      &none &none        &none &none
             >;
         };
 
@@ -197,7 +197,7 @@
                 &none &kp N7  &none        &none      &none       &none
                 &none &none &none        &mkp LCLK  &mkp RCLK   &none
           &none &none &none &none        &none      &none &none &none
-                            &none        &none
+                      &none &none        &none &none
             >;
         };
 
