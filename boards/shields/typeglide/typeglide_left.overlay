@@ -7,6 +7,10 @@
 #include <input_processor_stop.dtsi>
 #include <behaviors/mouse_scroll.dtsi>
 #include <dt-bindings/zmk/pointing.h>
+#include <input/processors.dtsi>
+#include <behaviors/input_gestures_accel.dtsi>
+#include <keymap_defs.dtsi>
+
 /*
  * Left half
  *
@@ -83,15 +87,52 @@
  * This is the PMW3610 coming from the right half.
  */
 
+&pointer_accel {
+    input-type = <INPUT_EV_REL>;
+    track-remainders;
+
+    min-factor = <800>;
+    max-factor = <3000>;
+
+    speed-threshold = <1200>;
+    speed-max = <6000>;
+
+    acceleration-exponent = <2>;
+};
+
+/ {
+    zip_xy_snipe: zip_xy_snipe {
+        compatible = "zmk,input-processor-scaler";
+        #input-processor-cells = <2>;
+        type = <INPUT_EV_REL>;
+        codes = <INPUT_REL_X INPUT_REL_Y>;
+        track-remainders;
+    };
+};
+
 &m_split_listener {
     status = "okay";
     //status = "disabled";
     input-processors = <&mouse_input_stop>;
 
-    layer_active {
-        layers = <3>;
-        input-processors = <&zip_rotate_pointer>;
+    mouse_snipe {
+        layers = <8>; // MO_SNIPE_L
+        input-processors = <
+            &pointer_accel
+            &zip_xy_snipe 1 2
+            &zip_rotate_pointer
+
+        >;
     };
+    mouse  {
+        layers = <7>;  // MO_L
+        input-processors = <
+            &pointer_accel
+            &zip_rotate_pointer
+        >;
+    };
+
+
 };
 
 
@@ -109,6 +150,11 @@
 //         bind order: down up forward backward
 
 
+
+#define TG_MODS &kp LGUI &kp LCTRL &kp LSHIFT &kp LALT
+#define TG_SCRLS &msc SCRL_DOWN &msc SCRL_UP &msc SCRL_LEFT &msc SCRL_RIGHT
+
+
 / {
     joystick_4way_left: joystick_4way_left {
         compatible = "typeglide,joystick-4way";
@@ -122,17 +168,10 @@
 
         layer-count = <2>;
 
+// FWD, BACK, UP,DOWN
         bindings = <
-            &msc SCRL_DOWN
-            &msc SCRL_UP
-            &tg_caps_word_or_scroll
-            &msc SCRL_LEFT
-
-            &msc SCRL_DOWN
-            &msc SCRL_UP
-            &msc SCRL_RIGHT
-            &msc SCRL_LEFT
-
+            TG_MODS
+            TG_SCRLS
         >;
     };
 

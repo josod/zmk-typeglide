@@ -18,7 +18,7 @@
 set -e
 
 BOARD="nice_nano//zmk"
-EXTRA_MODULES="/workspaces/zmk-modules/zmk-typeglide;/workspaces/zmk-modules/zmk-pmw3610-driver;/workspaces/zmk-modules/zmk-input-processor-rotate-plane"
+EXTRA_MODULES="/workspaces/zmk-modules/zmk-pointing-acceleration;/workspaces/zmk-modules/zmk-typeglide;/workspaces/zmk-modules/zmk-pmw3610-driver;/workspaces/zmk-modules/zmk-input-processor-rotate-plane"
 CONFIG="/workspaces/zmk-config/config"
 
 SIDE=""

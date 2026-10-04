@@ -1,0 +1,52 @@
+
+// Left hand: 11 keys
+#define LTR  0   // Left Top Ring
+#define LTM  1   // Left Top Middle
+#define LTI  2   // Left Top Index
+
+#define LMR  6   // Left Middle Ring
+#define LMM  7   // Left Middle Middle
+#define LMI  8   // Left Middle Index
+
+#define LBP 12   // Left Bottom Pinky
+#define LBR 13   // Left Bottom Ring
+#define LBM 14   // Left Bottom Middle
+#define LBI 15   // Left Bottom Index
+
+#define LST 20   // Left Switch Thumb
+#define LJT 21   // Left Joystick Thumb
+
+
+// Right hand: 11 keys
+#define RTI  3   // Right Top Index
+#define RTM  4   // Right Top Middle
+#define RTR  5   // Right Top Ring
+
+#define RMI  9   // Right Middle Index
+#define RMM 10   // Right Middle Middle
+#define RMR 11   // Right Middle Ring
+
+#define RBI 16   // Right Bottom Index
+#define RBM 17   // Right Bottom Middle
+#define RBR 18   // Right Bottom Ring
+#define RBP 19   // Right Bottom Pinky
+
+#define RJT 22   // Right Joystick Thumb
+#define RST 23   // Right Switch Thumb
+
+
+// Layers
+#define A0_L 0   // Alfa 1
+#define A1_L 1   // Alfa 2
+#define SC_L 2
+#define A0_SHIFTED_L 3
+#define A1_SHIFTED_L 4
+#define SYM_L 5
+#define NUM_L 6
+
+#define MO_L 7   // Mouse  REMEMBER: change m_split_listener layer_active on left overlay
+#define MO_SNIPE_L 8   // Mouse  REMEMBER: change m_split_listener layer_active on left overlay
+
+#define SYS_L 9
+
+#define ALL_L A0_L A1_L A0_SHIFTED_L A1_SHIFTED_L SYM_L NUM_L MO_L MO_SNIPE_L SYS_L
